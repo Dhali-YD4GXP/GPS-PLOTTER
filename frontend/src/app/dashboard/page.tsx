@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import html2canvas from 'html2canvas';
 
 export default function Dashboard() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,14 +20,37 @@ export default function Dashboard() {
 
   const handleDownload = async () => {
     if (chartRef.current) {
+      const target = chartRef.current;
+      // Simpan CSS asli
+      const originalWidth = target.style.width;
+      const originalHeight = target.style.height;
+      const rect = target.getBoundingClientRect();
+      
+      // Kunci ukuran menjadi statis dalam pixel agar tidak ambruk saat dirender ulang oleh html2canvas
+      target.style.width = `${rect.width}px`;
+      target.style.height = `${rect.height}px`;
+
+      // Tunggu sejenak agar Recharts selesai merespons perubahan ukuran menjadi absolut
+      await new Promise(resolve => setTimeout(resolve, 250));
+
       try {
-        const canvas = await html2canvas(chartRef.current, { backgroundColor: '#ffffff', scale: 2 });
+        const html2canvas = (await import('html2canvas')).default;
+        const canvas = await html2canvas(target, { 
+          backgroundColor: '#ffffff', 
+          scale: 2,
+          logging: false
+        });
         const link = document.createElement('a');
         link.download = `GPS_Plot_${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       } catch (err) {
         console.error("Gagal mendownload grafik", err);
+        alert("Gagal mengunduh grafik. Coba gunakan fitur Screenshot pada perangkat Anda.");
+      } finally {
+        // Kembalikan ke CSS responsif asli
+        target.style.width = originalWidth;
+        target.style.height = originalHeight;
       }
     }
   };
