@@ -243,22 +243,18 @@ export default function Dashboard() {
                       <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
                       <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
                       <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#000'}} />
-                      <Legend 
-                        layout="vertical" 
-                        verticalAlign="bottom" 
-                        align="left" 
-                        wrapperStyle={{
-                          padding: '10px', 
-                          backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                          border: '1px solid #cbd5e1', 
-                          borderRadius: '6px',
-                          fontSize: '11px', 
-                          color: '#000',
-                          bottom: 30,
-                          left: 30,
-                          width: 'auto'
-                        }} 
-                      />
+                      <svg x="20" y="75%" width="200" height="90" overflow="visible">
+                        <rect x="0" y="0" width="200" height="90" fill="rgba(255, 255, 255, 0.9)" stroke="#cbd5e1" rx="6" />
+                        
+                        <circle cx="20" cy="25" r="4" fill="#ef4444" />
+                        <text x="35" y="29" fontSize="11" fill="#000" fontWeight="bold">Titik GPS</text>
+                        
+                        <path d="M 16 41 L 24 49 M 24 41 L 16 49" stroke="#ef4444" strokeWidth="2" />
+                        <text x="35" y="49" fontSize="11" fill="#000" fontWeight="bold">Koordinat Pembanding</text>
+                        
+                        <line x1="15" y1="65" x2="25" y2="65" stroke="#b48c1e" strokeWidth="2" strokeDasharray="3 3" />
+                        <text x="35" y="69" fontSize="11" fill="#000" fontWeight="bold">Lingkaran Rata-rata</text>
+                      </svg>
                       
                       <ReferenceLine x={0} stroke="#000" strokeWidth={1} />
                       <ReferenceLine y={0} stroke="#000" strokeWidth={1} />
