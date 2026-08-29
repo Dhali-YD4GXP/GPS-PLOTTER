@@ -243,14 +243,14 @@ export default function Dashboard() {
                       <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
                       <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
                       <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#000'}} />
-                      <Legend verticalAlign="bottom" align="left" height={36} iconType="circle" wrapperStyle={{paddingTop: '20px', paddingLeft: '20px', fontSize: '12px', color: '#000'}} />
+                      <Legend verticalAlign="bottom" align="left" height={36} wrapperStyle={{paddingTop: '20px', paddingLeft: '20px', fontSize: '12px', color: '#000'}} />
                       
                       <ReferenceLine x={0} stroke="#000" strokeWidth={1} />
                       <ReferenceLine y={0} stroke="#000" strokeWidth={1} />
                       
-                      <Scatter name="Titik GPS" data={plotData.points} fill="#ef4444" shape="circle" />
+                      <Scatter name="Titik GPS" data={plotData.points} fill="#ef4444" shape="circle" legendType="circle" />
                       
-                      <Scatter name="Koordinat Pembanding" data={[{x: 0, y: 0}]} fill="#ef4444" shape="cross" />
+                      <Scatter name="Koordinat Pembanding" data={[{x: 0, y: 0}]} fill="#ef4444" shape="cross" legendType="cross" />
                       
                       <Scatter 
                         name="Lingkaran Rata-rata" 
@@ -258,6 +258,7 @@ export default function Dashboard() {
                         fill="transparent" 
                         line={{ stroke: '#b48c1e', strokeWidth: 2, strokeDasharray: '6 6' }}
                         shape={<g></g>}
+                        legendType="plainline"
                       />
 
                       <Scatter 
