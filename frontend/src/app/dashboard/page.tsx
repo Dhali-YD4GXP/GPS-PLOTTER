@@ -48,7 +48,8 @@ export default function Dashboard() {
         const canvas = document.createElement('canvas');
         // Double resolution for high quality
         canvas.width = rect.width * 2;
-        canvas.height = (rect.height + 80) * 2; // Add 80px space for title
+        // Increase height to make room for Title (80px) and Legend (120px)
+        canvas.height = (rect.height + 80 + 120) * 2; 
         
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -65,6 +66,49 @@ export default function Dashboard() {
         
         // Draw the SVG chart below the title
         ctx.drawImage(img, 0, 100, rect.width * 2, rect.height * 2);
+
+        // --- MANUALLY DRAW LEGEND ---
+        const legendY = 100 + rect.height * 2 + 40;
+        const legendX = 40; // 20px * 2 scale
+
+        // Legend Background Box
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fillRect(legendX, legendY, 500, 170);
+        ctx.strokeRect(legendX, legendY, 500, 170);
+
+        ctx.font = 'bold 24px sans-serif'; // scale 2x
+        ctx.fillStyle = '#1e293b'; // text-slate-800
+        ctx.textAlign = 'left';
+
+        // 1. Titik GPS
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(legendX + 40, legendY + 40, 10, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.fillText("Titik GPS", legendX + 70, legendY + 48);
+
+        // 2. Koordinat Pembanding (Cross)
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(legendX + 30, legendY + 75); ctx.lineTo(legendX + 50, legendY + 95);
+        ctx.moveTo(legendX + 50, legendY + 75); ctx.lineTo(legendX + 30, legendY + 95);
+        ctx.stroke();
+        ctx.fillText("Koordinat Pembanding", legendX + 70, legendY + 93);
+
+        // 3. Lingkaran Rata-rata
+        ctx.strokeStyle = '#d97706'; // amber-600
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath();
+        ctx.moveTo(legendX + 25, legendY + 130);
+        ctx.lineTo(legendX + 55, legendY + 130);
+        ctx.stroke();
+        ctx.setLineDash([]); // reset
+        ctx.fillText("Lingkaran Rata-rata", legendX + 70, legendY + 138);
         
         // Trigger download
         const a = document.createElement('a');
