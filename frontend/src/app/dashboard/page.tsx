@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import html2canvas from 'html2canvas';
 
 export default function Dashboard() {
   const [file, setFile] = useState<File | null>(null);
@@ -16,6 +17,21 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  const handleDownload = async () => {
+    if (chartRef.current) {
+      try {
+        const canvas = await html2canvas(chartRef.current, { backgroundColor: '#ffffff', scale: 2 });
+        const link = document.createElement('a');
+        link.download = `GPS_Plot_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        console.error("Gagal mendownload grafik", err);
+      }
+    }
+  };
 
   useEffect(() => {
     if (Cookies.get('role') !== 'user' && Cookies.get('role') !== 'admin') {
@@ -68,6 +84,12 @@ export default function Dashboard() {
       });
     }
   }
+
+  const labelData = plotData ? [{
+    x: plotData.mean_distance * Math.cos(Math.PI / 4), // 45 degrees
+    y: plotData.mean_distance * Math.sin(Math.PI / 4),
+    label: `Rerata Simpangan = ${plotData.mean_distance.toFixed(2)} meter`
+  }] : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-800 flex flex-col font-sans">
@@ -134,47 +156,56 @@ export default function Dashboard() {
         <div className="w-full lg:w-2/3 bg-white p-4 lg:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col min-h-[500px] lg:min-h-[600px] relative overflow-hidden">
           {plotData ? (
             <div className="flex-1 flex flex-col animate-in fade-in duration-500">
-              <div className="mb-4 lg:mb-6 text-center">
-                <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-2">{title}</h2>
-                <div className="inline-flex items-center space-x-2 bg-slate-100 px-3 lg:px-4 py-1 lg:py-1.5 rounded-full">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                  <p className="text-xs lg:text-sm text-slate-600 font-medium truncate max-w-[200px] sm:max-w-md">Ref: {plotData.lat_ref}, {plotData.lon_ref}</p>
+              <div className="flex justify-between items-center mb-4 lg:mb-6">
+                <div>
+                  <h2 className="text-xl lg:text-2xl font-bold text-slate-800 mb-2">{title}</h2>
+                  <div className="inline-flex items-center space-x-2 bg-slate-100 px-3 lg:px-4 py-1 lg:py-1.5 rounded-full">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <p className="text-xs lg:text-sm text-slate-600 font-medium truncate max-w-[200px] sm:max-w-md">Ref: {plotData.lat_ref}, {plotData.lon_ref}</p>
+                  </div>
                 </div>
+                <button onClick={handleDownload} className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-4 py-2 rounded-lg font-bold text-sm border border-indigo-200 transition-colors flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                  Download Grafik
+                </button>
               </div>
               
               <div className="flex-1 w-full relative flex items-center justify-center bg-slate-50/50 rounded-2xl border border-slate-100 p-2 lg:p-4">
-                <div className="absolute top-2 right-2 lg:top-6 lg:right-6 bg-white/90 backdrop-blur-md p-3 lg:p-4 rounded-2xl shadow-lg shadow-amber-500/10 border border-amber-100 z-10 transform transition hover:scale-105">
-                  <p className="text-[10px] lg:text-xs text-amber-600 uppercase font-bold tracking-widest mb-1 flex items-center">
-                    <svg className="w-3 h-3 lg:w-4 lg:h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Akurasi
-                  </p>
-                  <p className="text-lg lg:text-2xl font-black text-amber-500">{plotData.mean_distance.toFixed(3)} <span className="text-xs lg:text-sm font-semibold text-amber-400">m</span></p>
-                </div>
-
-                <div className="w-full max-w-full aspect-square flex items-center justify-center">
+                <div 
+                  ref={chartRef} 
+                  className="w-full max-w-full aspect-square bg-white border border-slate-300 flex flex-col items-center justify-center relative p-4"
+                >
+                  <h3 className="text-lg font-bold text-black mb-4 uppercase tracking-widest">{title}</h3>
                   <ResponsiveContainer width="100%" height="100%" aspect={1}>
-                    <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.8} />
-                      <XAxis type="number" dataKey="x" name="Longitude (m)" tickCount={8} domain={['auto', 'auto']} tick={{fill: '#64748b', fontSize: 12}} axisLine={{stroke: '#cbd5e1'}} />
-                      <YAxis type="number" dataKey="y" name="Latitude (m)" tickCount={8} domain={['auto', 'auto']} tick={{fill: '#64748b', fontSize: 12}} axisLine={{stroke: '#cbd5e1'}} />
-                      <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '12px'}} />
-                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{paddingTop: '20px', fontSize: '12px'}} />
+                    <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={['auto', 'auto']} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
+                      <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={['auto', 'auto']} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
+                      <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#000'}} />
+                      <Legend verticalAlign="bottom" align="left" height={36} iconType="circle" wrapperStyle={{paddingTop: '20px', paddingLeft: '20px', fontSize: '12px', color: '#000'}} />
                       
-                      <ReferenceLine x={0} stroke="#94a3b8" strokeWidth={1.5} />
-                      <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1.5} />
+                      <ReferenceLine x={0} stroke="#000" strokeWidth={1} />
+                      <ReferenceLine y={0} stroke="#000" strokeWidth={1} />
                       
                       <Scatter name="Titik GPS" data={plotData.points} fill="#ef4444" shape="circle" />
+                      
                       <Scatter name="Koordinat Pembanding" data={[{x: 0, y: 0}]} fill="#ef4444" shape="cross" />
                       
                       <Scatter 
                         name="Lingkaran Rata-rata" 
                         data={circleData} 
                         fill="transparent" 
-                        stroke="#d97706" 
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        line 
+                        line={{ stroke: '#b48c1e', strokeWidth: 2, strokeDasharray: '6 6' }}
                         shape={<g></g>}
+                      />
+
+                      <Scatter 
+                        name="Teks" 
+                        data={labelData} 
+                        fill="transparent"
+                        shape={<g></g>}
+                        legendType="none"
+                        label={{ dataKey: 'label', position: 'right', fill: '#b48c1e', fontWeight: 'bold', fontSize: 12 }}
                       />
                     </ScatterChart>
                   </ResponsiveContainer>
