@@ -93,7 +93,7 @@ func adminLogin(c *gin.Context) {
 		return
 	}
 
-	if req.Username == "admin" && req.Password == "admin123" {
+	if req.Username == "HidungBelang" && req.Password == "TeddyBoti" {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"role": "admin",
 			"exp":  time.Now().Add(24 * time.Hour).Unix(),
