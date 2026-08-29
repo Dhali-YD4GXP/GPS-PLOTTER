@@ -231,10 +231,10 @@ export default function Dashboard() {
                 </button>
               </div>
               
-              <div className="flex-1 w-full relative flex items-center justify-center bg-slate-50/50 rounded-2xl border border-slate-100 p-2 lg:p-4">
+              <div className="flex-1 w-full relative flex flex-col items-center bg-slate-50/50 rounded-2xl border border-slate-100 p-2 lg:p-4">
                 <div 
                   ref={chartRef} 
-                  className="w-full max-w-full aspect-square bg-white border border-slate-300 flex flex-col items-center justify-center relative p-4"
+                  className="w-full max-w-full aspect-square bg-white border border-slate-300 flex flex-col items-center justify-center relative p-4 mb-4 shadow-sm"
                 >
                   <h3 className="text-lg font-bold text-black mb-4 uppercase tracking-widest">{title}</h3>
                   <ResponsiveContainer width="100%" height="100%" aspect={1}>
@@ -243,19 +243,7 @@ export default function Dashboard() {
                       <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
                       <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
                       <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#000'}} />
-                      <svg x="20" y="75%" width="200" height="90" overflow="visible">
-                        <rect x="0" y="0" width="200" height="90" fill="rgba(255, 255, 255, 0.9)" stroke="#cbd5e1" rx="6" />
-                        
-                        <circle cx="20" cy="25" r="4" fill="#ef4444" />
-                        <text x="35" y="29" fontSize="11" fill="#000" fontWeight="bold">Titik GPS</text>
-                        
-                        <path d="M 16 41 L 24 49 M 24 41 L 16 49" stroke="#ef4444" strokeWidth="2" />
-                        <text x="35" y="49" fontSize="11" fill="#000" fontWeight="bold">Koordinat Pembanding</text>
-                        
-                        <line x1="15" y1="65" x2="25" y2="65" stroke="#b48c1e" strokeWidth="2" strokeDasharray="3 3" />
-                        <text x="35" y="69" fontSize="11" fill="#000" fontWeight="bold">Lingkaran Rata-rata</text>
-                      </svg>
-                      
+
                       <ReferenceLine x={0} stroke="#000" strokeWidth={1} />
                       <ReferenceLine y={0} stroke="#000" strokeWidth={1} />
                       
@@ -282,6 +270,22 @@ export default function Dashboard() {
                       />
                     </ScatterChart>
                   </ResponsiveContainer>
+                </div>
+                
+                {/* HTML Legend Tampil di Layar (Tidak Menimpa Grafik) */}
+                <div className="bg-white border border-slate-300 p-4 rounded-lg shadow-sm flex flex-col space-y-3 w-full self-start max-w-sm">
+                  <div className="flex items-center space-x-3">
+                    <span className="w-3.5 h-3.5 rounded-full bg-red-500 shadow-sm"></span>
+                    <span className="text-sm font-bold text-slate-800">Titik GPS</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-red-500 font-black text-lg leading-none select-none w-3.5 text-center">&#10005;</span>
+                    <span className="text-sm font-bold text-slate-800">Koordinat Pembanding</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="w-4 border-t-2 border-dashed border-amber-600"></span>
+                    <span className="text-sm font-bold text-slate-800">Lingkaran Rata-rata</span>
+                  </div>
                 </div>
               </div>
             </div>
