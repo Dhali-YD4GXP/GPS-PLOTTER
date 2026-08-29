@@ -18,40 +18,69 @@ export default function Dashboard() {
   const router = useRouter();
   const chartRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = async () => {
-    if (chartRef.current) {
-      const target = chartRef.current;
-      // Simpan CSS asli
-      const originalWidth = target.style.width;
-      const originalHeight = target.style.height;
-      const rect = target.getBoundingClientRect();
-      
-      // Kunci ukuran menjadi statis dalam pixel agar tidak ambruk saat dirender ulang oleh html2canvas
-      target.style.width = `${rect.width}px`;
-      target.style.height = `${rect.height}px`;
-
-      // Tunggu sejenak agar Recharts selesai merespons perubahan ukuran menjadi absolut
-      await new Promise(resolve => setTimeout(resolve, 250));
-
-      try {
-        const html2canvas = (await import('html2canvas')).default;
-        const canvas = await html2canvas(target, { 
-          backgroundColor: '#ffffff', 
-          scale: 2,
-          logging: false
-        });
-        const link = document.createElement('a');
-        link.download = `GPS_Plot_${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      } catch (err) {
-        console.error("Gagal mendownload grafik", err);
-        alert("Gagal mengunduh grafik. Coba gunakan fitur Screenshot pada perangkat Anda.");
-      } finally {
-        // Kembalikan ke CSS responsif asli
-        target.style.width = originalWidth;
-        target.style.height = originalHeight;
+  const handleDownload = () => {
+    if (!chartRef.current) return;
+    try {
+      const svgElement = chartRef.current.querySelector('svg');
+      if (!svgElement) {
+        alert("Grafik belum siap diunduh.");
+        return;
       }
+      
+      const rect = svgElement.getBoundingClientRect();
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svgElement);
+      
+      // Ensure xmlns is present for standalone rendering
+      if (!svgString.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+        svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      // Force explicit width/height in pixels so Image() object has dimensions
+      svgString = svgString.replace(/^<svg/, `<svg width="${rect.width}" height="${rect.height}"`);
+
+
+      // Convert SVG to data URL
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Double resolution for high quality
+        canvas.width = rect.width * 2;
+        canvas.height = (rect.height + 80) * 2; // Add 80px space for title
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        // Fill white background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw Title
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 36px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(title.toUpperCase(), canvas.width / 2, 80);
+        
+        // Draw the SVG chart below the title
+        ctx.drawImage(img, 0, 100, rect.width * 2, rect.height * 2);
+        
+        // Trigger download
+        const a = document.createElement('a');
+        a.download = `GPS_Plot_${Date.now()}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+        
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = () => {
+        alert("Gagal merender SVG. Silakan gunakan fitur screenshot.");
+      };
+      img.src = url;
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengunduh grafik.");
     }
   };
 
@@ -112,6 +141,16 @@ export default function Dashboard() {
     y: plotData.mean_distance * Math.sin(Math.PI / 4),
     label: `Rerata Simpangan = ${plotData.mean_distance.toFixed(2)} meter`
   }] : [];
+
+  let maxAbsValue = 0;
+  if (plotData) {
+    plotData.points.forEach((p: any) => {
+      if (Math.abs(p.x) > maxAbsValue) maxAbsValue = Math.abs(p.x);
+      if (Math.abs(p.y) > maxAbsValue) maxAbsValue = Math.abs(p.y);
+    });
+    if (plotData.mean_distance > maxAbsValue) maxAbsValue = plotData.mean_distance;
+    maxAbsValue = Math.ceil(maxAbsValue * 1.2); // Tambah margin 20% agar tidak mentok di pinggir
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 text-slate-800 flex flex-col font-sans">
@@ -201,8 +240,8 @@ export default function Dashboard() {
                   <ResponsiveContainer width="100%" height="100%" aspect={1}>
                     <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={['auto', 'auto']} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
-                      <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={['auto', 'auto']} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
+                      <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
+                      <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
                       <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#000'}} />
                       <Legend verticalAlign="bottom" align="left" height={36} iconType="circle" wrapperStyle={{paddingTop: '20px', paddingLeft: '20px', fontSize: '12px', color: '#000'}} />
                       
