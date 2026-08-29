@@ -1,0 +1,26 @@
+# Virtual Environment
+venv/
+__pycache__/
+*.pyc
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Backend
+backend/tokens.json
+backend/gps-backend
+
+# Windows Executables
+*.exe
+dist/
+build/
+*.spec
+
+# OS files
+.DS_Store
