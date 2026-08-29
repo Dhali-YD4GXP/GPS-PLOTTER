@@ -151,7 +151,7 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.8} />
                     <XAxis type="number" dataKey="x" name="Longitude (m)" tickCount={10} domain={['auto', 'auto']} tick={{fill: '#64748b'}} axisLine={{stroke: '#cbd5e1'}} />
                     <YAxis type="number" dataKey="y" name="Latitude (m)" tickCount={10} domain={['auto', 'auto']} tick={{fill: '#64748b'}} axisLine={{stroke: '#cbd5e1'}} />
-                    <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: number) => value.toFixed(3) + ' m'} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                    <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
                     <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{paddingTop: '20px'}} />
                     
                     <ReferenceLine x={0} stroke="#94a3b8" strokeWidth={1.5} />
