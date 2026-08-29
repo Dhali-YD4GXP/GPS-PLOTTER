@@ -18,7 +18,7 @@ export default function AdminDashboard() {
 
   const fetchTokens = async () => {
     try {
-      const res = await axios.get('http://localhost:8081/api/admin/tokens', {
+      const res = await axios.get('https://bengkelinovasi-gpsplotter.my.id/api/admin/tokens', {
         headers: { Authorization: `Bearer ${Cookies.get('token')}` }
       });
       setTokens(res.data);
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   const generateToken = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8081/api/admin/tokens', { 
+      await axios.post('https://bengkelinovasi-gpsplotter.my.id/api/admin/tokens', { 
         token_code: tokenCode,
         research_title: researchTitle,
         school_name: schoolName,
@@ -67,7 +67,7 @@ export default function AdminDashboard() {
   const deactivateToken = async (tokenId: string) => {
     if (!confirm(`Yakin ingin menonaktifkan token ${tokenId}?`)) return;
     try {
-      await axios.post('http://localhost:8081/api/admin/tokens/deactivate', { token: tokenId }, {
+      await axios.post('https://bengkelinovasi-gpsplotter.my.id/api/admin/tokens/deactivate', { token: tokenId }, {
         headers: { Authorization: `Bearer ${Cookies.get('token')}` }
       });
       fetchTokens();

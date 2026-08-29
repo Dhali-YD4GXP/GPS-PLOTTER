@@ -13,6 +13,7 @@ export default function Dashboard() {
   
   const [plotData, setPlotData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
 
@@ -30,7 +31,11 @@ export default function Dashboard() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return alert("Pilih file terlebih dahulu!");
+    setError(null);
+    if (!file) {
+      setError("Pilih file terlebih dahulu!");
+      return;
+    }
 
     setLoading(true);
     const formData = new FormData();
@@ -39,7 +44,7 @@ export default function Dashboard() {
     formData.append('lon_ref', lonRef);
 
     try {
-      const res = await axios.post('http://localhost:8081/api/gps/process', formData, {
+      const res = await axios.post('https://bengkelinovasi-gpsplotter.my.id/api/gps/process', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${Cookies.get('token')}`
@@ -47,7 +52,7 @@ export default function Dashboard() {
       });
       setPlotData(res.data);
     } catch (err: any) {
-      alert(err.response?.data?.error || "Terjadi kesalahan saat memproses data.");
+      setError(err.response?.data?.error || "Terjadi kesalahan saat memproses data. Cek format file Anda.");
     } finally {
       setLoading(false);
     }

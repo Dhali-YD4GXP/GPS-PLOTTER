@@ -17,12 +17,12 @@ export default function Login() {
     setError('');
     try {
       if (mode === 'admin') {
-        const res = await axios.post('http://localhost:8081/api/admin/login', { username, password });
+        const res = await axios.post('https://bengkelinovasi-gpsplotter.my.id/api/admin/login', { username, password });
         Cookies.set('token', res.data.token);
         Cookies.set('role', 'admin');
         router.push('/admin');
       } else {
-        const res = await axios.post('http://localhost:8081/api/auth/login', { token });
+        const res = await axios.post('https://bengkelinovasi-gpsplotter.my.id/api/auth/login', { token });
         Cookies.set('token', res.data.token);
         Cookies.set('role', 'user');
         router.push('/dashboard');
