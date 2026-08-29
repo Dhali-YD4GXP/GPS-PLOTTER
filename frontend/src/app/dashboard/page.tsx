@@ -243,7 +243,22 @@ export default function Dashboard() {
                       <XAxis type="number" dataKey="x" name="longitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'longitude (meter)', position: 'bottom', offset: 0, fill: '#000' }} />
                       <YAxis type="number" dataKey="y" name="latitude (meter)" tickCount={8} domain={[-maxAbsValue, maxAbsValue]} tick={{fill: '#000', fontSize: 12}} axisLine={{stroke: '#000'}} label={{ value: 'latitude (meter)', angle: -90, position: 'left', offset: 10, fill: '#000' }} />
                       <Tooltip cursor={{ strokeDasharray: '3 3', stroke: '#94a3b8' }} formatter={(value: any) => Number(value).toFixed(3) + ' m'} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#000'}} />
-                      <Legend verticalAlign="bottom" align="left" height={36} wrapperStyle={{paddingTop: '20px', paddingLeft: '20px', fontSize: '12px', color: '#000'}} />
+                      <Legend 
+                        layout="vertical" 
+                        verticalAlign="bottom" 
+                        align="left" 
+                        wrapperStyle={{
+                          padding: '10px', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                          border: '1px solid #cbd5e1', 
+                          borderRadius: '6px',
+                          fontSize: '11px', 
+                          color: '#000',
+                          bottom: 30,
+                          left: 30,
+                          width: 'auto'
+                        }} 
+                      />
                       
                       <ReferenceLine x={0} stroke="#000" strokeWidth={1} />
                       <ReferenceLine y={0} stroke="#000" strokeWidth={1} />
